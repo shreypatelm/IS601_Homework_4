@@ -1,53 +1,39 @@
 """
-This module provides arithmetic operations using the Decimal type for 
-high precision calculations, suitable for accurate numeric applications.
+This module contains tests for the calculator operations and Calculation class.
 """
 from decimal import Decimal
 import pytest
 from calculator.calculation import Calculation
-from calculator.operations import add, subtract, multiply, division
+from calculator.operations import add, division
 
-@pytest.mark.parametrize("operand1, operand2, operation, expected", [
-    (Decimal('15'), Decimal('3'), add, Decimal('18')),
-    (Decimal('15'), Decimal('3'), subtract, Decimal('12')),
-    (Decimal('15'), Decimal('3'), multiply, Decimal('45')),
-    (Decimal('15'), Decimal('3'), division, Decimal('5')),
-    (Decimal('15.5'), Decimal('3.5'), add, Decimal('19.0')),
-    (Decimal('15.5'), Decimal('3.5'), subtract, Decimal('12.0')),
-    (Decimal('15.5'), Decimal('3'), multiply, Decimal('46.5')),
-    (Decimal('15'), Decimal('0.5'), division, Decimal('30')),
-])
-
-def test_calculation_operations(operand1, operand2, operation, expected):
+# pylint: disable=invalid-name
+def test_calculation_operations(a, b, operation, expected):
     """
-    Validate the perform method of the Calculation class for specified operations.
-
-    This function asserts that the result of the calculation matches the expected 
-    value for given operands and operation, helping to ensure accuracy in arithmetic operations.
+    This test ensures that the Calculation class correctly performs the arithmetic operation
+    (specified by the 'operation' parameter) on two Decimal operands ('a' and 'b'),
+    and that the result matches the expected outcome.
+    
+    Parameters:
+        a (Decimal): The first operand in the calculation.
+        b (Decimal): The second operand in the calculation.
+        operation (function): The arithmetic operation to perform.
+        expected (Decimal): The expected result of the operation.
     """
-    calc = Calculation(operand1, operand2, operation)
-    assert calc.perform() == expected, f"Failed {operation.__name__} operation with {operand1} and {operand2}"
-
+    calc = Calculation(a, b, operation)
+    assert calc.perform() == expected, f"Failed {operation.__name__} operation with {a} and {b}"
 
 def test_calculation_repr():
     """
-    Validate the __repr__ method of the Calculation class.
-
-    This test checks if the string representation of a Calculation instance correctly 
-    reflects its operands and the operation being performed, ensuring accurate object 
-    representation for debugging and logging purposes.
+    Tests the __repr__ method of the Calculation class.
     """
-    calc = Calculation(Decimal('10'), Decimal('5'), add)  # Create a Calculation instance for testing.
-    expected_repr = "Calculation(10, 5, add)"  # Define the expected string representation.
-    assert repr(calc) == expected_repr, "The __repr__ method output does not match the expected string."
-
+    calc = Calculation(Decimal('10'), Decimal('5'), add)
+    expected_repr = "Calculation(10, 5, add)"
+    # assert calc.__repr__() == expected_repr, "The __repr__ method output does not match the expected string."
+    assert repr(calc) == expected_repr, "The repr method output does not match the expected string."
 
 def test_divide_by_zero():
     """
-    Test division by zero to ensure it raises a ValueError.
-    
-    This test checks that attempting to perform a division operation with a zero divisor
-    correctly raises a ValueError, as dividing by zero is mathematically undefined and should be handled as an error.
+    Tests that dividing by zero raises a ValueError.
     """
     calc = Calculation(Decimal('10'), Decimal('0'), division)
     with pytest.raises(ValueError, match="Cannot divide by zero"):
