@@ -1,4 +1,4 @@
 *.sw*
 .coverage
 .pytest_cache
-*__pycache_:_
+*__pycache__
