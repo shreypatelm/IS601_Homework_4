@@ -1,7 +1,7 @@
+import sys
 from app.commands import Command
 
 class ExitCommand(Command):
-    def execute(self):
-        print("Exiting the program...")
-        raise SystemExit  # This will terminate the application
-
+    def execute(self, *args, **kwargs):
+        sys.exit("Exiting the program...")
+        
