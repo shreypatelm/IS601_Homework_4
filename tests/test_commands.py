@@ -1,10 +1,10 @@
 import pytest
 from app import App
-from app.commands.exit import ExitCommand
-from app.commands.add import AddCommand
-from app.commands.subtract import SubtractCommand
-from app.commands.multiply import MultiplyCommand
-from app.commands.divide import DivideCommand
+from app.plugins.exit import ExitCommand
+from app.plugins.add import AddCommand
+from app.plugins.subtract import SubtractCommand
+from app.plugins.multiply import MultiplyCommand
+from app.plugins.divide import DivideCommand
 
 # Test for ExitCommand
 def test_exit_command(capfd):

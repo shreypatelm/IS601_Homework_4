@@ -7,3 +7,4 @@ class DivideCommand(Command):
         else:
             print(f"The answer is {a / b}")
 
+
