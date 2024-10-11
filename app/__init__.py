@@ -1,38 +1,44 @@
-from app.commands import CommandHandler
-from app.commands.exit import ExitCommand
-from app.commands.add import AddCommand
-from app.commands.subtract import SubtractCommand
-from app.commands.multiply import MultiplyCommand
-from app.commands.divide import DivideCommand
+import os
+import sys
+import pkgutil
+import importlib
+
+from app.commands import Command, CommandHandler
 
 class App:
-    def __init__(self):  # Constructor
-        self.command_handler = CommandHandler()
-
+    def __init__(self):
+        self.command_handler = CommandHandler()  # Initialize the CommandHandler to manage commands
+    
+    def load_plugins(self):
+        # Dynamically load all plugins from the 'app.plugins' directory
+        plugins_package = 'app.plugins'
+        # Iterate through the plugins folder to find and load all command plugins
+        for _, plugin_name, is_pkg in pkgutil.iter_modules([plugins_package.replace('.', os.sep)]):
+            if is_pkg:
+                plugin_module = importlib.import_module(f'{plugins_package}.{plugin_name}')
+                for item_name in dir(plugin_module):
+                    item = getattr(plugin_module, item_name)
+                    try:
+                        # Register the command if it's a subclass of Command
+                        if issubclass(item, Command):
+                            self.command_handler.register_command(plugin_name, item())
+                    except TypeError:
+                        continue
+    
     def start(self):
-        # Register commands here (command name mapped to command class)
-        self.command_handler.register_command("add", AddCommand)
-        self.command_handler.register_command("subtract", SubtractCommand)
-        self.command_handler.register_command("multiply", MultiplyCommand)
-        self.command_handler.register_command("divide", DivideCommand)
-        self.command_handler.register_command("exit", ExitCommand)
+        # Load all available plugins (commands)
+        self.load_plugins()
 
-        print("Available commands: add, subtract, multiply, divide, exit")
-        print("Type 'command number1 number2' (e.g., 'add 2 2') or 'exit' to quit.")
+        print(f"Available commands: {', '.join(list(self.command_handler.commands.keys()))}")
+        print(f"Usage: Command num1 num2 (Ex: add 3 4) or type 'exit' to exit.\n")
 
         while True:  # REPL (Read, Evaluate, Print, Loop)
-            user_input = input(">>> ").strip().lower()
-            if user_input == "exit":
-                self.command_handler.execute_command("exit")
-                break
-
-            # Parse user input into command and arguments
-            try:
-                command_name, a, b = user_input.split()
-                a = float(a)
-                b = float(b)
-                self.command_handler.execute_command(command_name, a, b)
-            except ValueError:
-                print("Invalid input format. Please enter command followed by two numbers.")
-            except KeyError:
-                print(f"No such command: {command_name}")
+            user_input = input(">>> ").strip().split(" ")
+            command_name = user_input[0]
+            
+            if command_name == 'exit':
+                # print("Exiting...")
+                sys.exit("Exiting...")  # Explicitly raise SystemExit for test to catch
+            
+            # Run the specified command with provided arguments
+            self.command_handler.execute_command(command_name, *user_input[1:])

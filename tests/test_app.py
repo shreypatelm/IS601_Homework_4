@@ -1,43 +1,44 @@
 import pytest
 from app import App
 
-def test_app_start_exit_command(capfd, monkeypatch):
-    """Test that the REPL exits correctly on 'exit' command."""
-    # Simulate user entering 'exit'
-    monkeypatch.setattr('builtins.input', lambda _: 'exit')
+@pytest.mark.parametrize("command", [
+    ('add'),
+    ('subtract'),
+    ('multiply'),
+    ('divide'),
+])
+def test_calculation_operations(command, monkeypatch):
+    """Simulate command followed by exit."""
+    inputs = iter([f'{command} 1 1', 'exit'])  # Simulate command with arguments
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    
     app = App()
+    
     with pytest.raises(SystemExit) as e:
-        app.start()
-    assert e.type == SystemExit
+        app.start()  # Ensure the app start triggers SystemExit
+    
+    assert e.type == SystemExit  # Check if SystemExit was raised
+    assert str(e.value) == "Exiting..."  # Ensure correct exit message
 
-# def test_app_start_unknown_command(capfd, monkeypatch):
-#     """Test how the REPL handles an unknown command before exiting."""
-#     # Simulate user entering an unknown command followed by 'exit'
-#     inputs = iter(['unknown_command', 'exit'])
-#     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+def test_app_start_exit_command(monkeypatch):
+    """Test that the REPL exits correctly on 'exit' command."""
+    monkeypatch.setattr('builtins.input', lambda _: 'exit')  # Simulate 'exit' input
+    app = App()
+    
+    with pytest.raises(SystemExit) as e:
+        app.start()  # Ensure SystemExit is raised when 'exit' is entered
+    
+    assert e.type == SystemExit  # Ensure SystemExit type
 
-#     app = App()
-
-#     with pytest.raises(SystemExit) as excinfo:
-#         app.start()
-
-#     # Verify that the unknown command was handled as expected
-#     captured = capfd.readouterr()
-#     assert "No such command: unknown_command" in captured.out
-#     assert "Exiting the program..." in captured.out
-
-# def test_app_invalid_input_format(capfd, monkeypatch):
-#     """Test how the REPL handles invalid input formats."""
-#     # Simulate invalid input followed by 'exit'
-#     inputs = iter(['add 2', 'exit'])  # Missing one argument for 'add'
-#     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-
-#     app = App()
-
-#     with pytest.raises(SystemExit) as excinfo:
-#         app.start()
-
-#     # Verify that the invalid input format was handled as expected
-#     captured = capfd.readouterr()
-#     assert "Invalid input format. Please enter command followed by two numbers." in captured.out
-#     assert "Exiting the program..." in captured.out
+def test_app_start_unknown_command(capfd, monkeypatch):
+    """Test how the REPL handles an unknown command before exiting."""
+    inputs = iter(['unknown_command', 'exit'])  # Simulate unknown command + exit
+    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    
+    app = App()
+    
+    with pytest.raises(SystemExit):
+        app.start()  # Ensure SystemExit is raised at the end
+    
+    captured = capfd.readouterr()  # Capture stdout and stderr
+    assert "No such command: unknown_command" in captured.out  # Verify correct handling

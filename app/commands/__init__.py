@@ -2,24 +2,33 @@ from abc import ABC, abstractmethod
 
 class Command(ABC):
     @abstractmethod
-    def execute(self):
+    def execute(self, *args, **kwargs):
         pass
 
 class CommandHandler:
     def __init__(self):
-        self.commands = {}
-
-    def register_command(self, command_name: str, command_class):
-        self.commands[command_name] = command_class
-
+        self.commands = {}  # Dictionary to store command names and their corresponding command classes
+    
+    def register_command(self, command_name: str, command: Command):
+        """Registers a command with its corresponding name."""
+        self.commands[command_name] = command
+    
     def execute_command(self, command_name: str, *args):
         """ 
+        Execute the command by its name, passing any arguments (e.g., numbers a and b).
         command_name: The name of the command (e.g., 'add', 'subtract')
         *args: The extra arguments for the command (e.g., numbers a and b)
         """
         try:
-            command_class = self.commands[command_name]
-            command = command_class()  # Create a new instance of the command
-            command.execute(*args)  # Pass the arguments (e.g., a and b)
+            if command_name not in self.commands:
+                raise KeyError(f"{command_name} command is not available.")
+            
+            # Execute the command
+            self.commands[command_name].execute(*args)
+        
         except KeyError:
             print(f"No such command: {command_name}")
+        except ValueError:
+            print("Enter valid numbers for the operation.")
+        except Exception as e:
+            print(f"Error executing command '{command_name}': {e}")

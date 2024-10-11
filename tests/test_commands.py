@@ -1,80 +1,41 @@
+"""Test commands"""
+
+from decimal import Decimal
 import pytest
-from app import App
-from app.commands.exit import ExitCommand
-from app.commands.add import AddCommand
-from app.commands.subtract import SubtractCommand
-from app.commands.multiply import MultiplyCommand
-from app.commands.divide import DivideCommand
+from app.plugins.add import AddCommand
+from app.plugins.subtract import SubtractCommand
+from app.plugins.multiply import MultiplyCommand
+from app.plugins.divide import DivideCommand
 
-# Test for ExitCommand
-def test_exit_command(capfd):
-    command = ExitCommand()
-    with pytest.raises(SystemExit):
-        command.execute()
-    out, err = capfd.readouterr()
-    assert out == "Exiting the program...\n", "The ExitCommand should print 'Exiting the program...'"
+@pytest.mark.parametrize("a, b, command, expected", [
+    (Decimal('10'), Decimal('5'), AddCommand, Decimal('15')),  # Test addition
+    (Decimal('10'), Decimal('5'), SubtractCommand, Decimal('5')),  # Test subtraction
+    (Decimal('10'), Decimal('5'), MultiplyCommand, Decimal('50')),  # Test multiplication
+    (Decimal('10'), Decimal('2'), DivideCommand, Decimal('5')),  # Test division
+    (Decimal('10.5'), Decimal('0.5'), AddCommand, Decimal('11.0')),  # Test addition with decimals
+    (Decimal('10.5'), Decimal('0.5'), SubtractCommand, Decimal('10.0')),  # Test subtraction with decimals
+    (Decimal('10.5'), Decimal('2'), MultiplyCommand, Decimal('21.0')),  # Test multiplication with decimals
+    (Decimal('10'), Decimal('0.5'), DivideCommand, Decimal('20')),  # Test division with decimals
+])
+def test_calculation_commands(a, b, command, expected):
+    """
+    Test calculation commands with various scenarios.
 
-# Test for AddCommand
-def test_app_add_command(capfd, monkeypatch):
-    inputs = iter(['add 2 3', 'exit'])  # Simulate input for REPL
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    This test ensures that the command class correctly performs the arithmetic operation
+    (specified by the 'command' parameter) on two Decimal operands ('a' and 'b'),
+    and that the result matches the expected outcome.
 
-    app = App()
-    with pytest.raises(SystemExit):
-        app.start()
+    Parameters:
+        a (Decimal): The first operand in the calculation.
+        b (Decimal): The second operand in the calculation.
+        command (function): The arithmetic command to perform.
+        expected (Decimal): The expected result of the operation.
+    """
+    assert command().evaluate(a, b) == expected, f"Failed {command.__name__} command with {a} and {b}"  # Perform the operation and assert that the result matches the expected value.
 
-    out, err = capfd.readouterr()
-    assert "The answer is 5" in out, "AddCommand should output 'The answer is 5'"
-    assert "Exiting the program..." in out
-
-# Test for SubtractCommand
-def test_app_subtract_command(capfd, monkeypatch):
-    inputs = iter(['subtract 5 3', 'exit'])  # Simulate input for REPL
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-
-    app = App()
-    with pytest.raises(SystemExit):
-        app.start()
-
-    out, err = capfd.readouterr()
-    assert "The answer is 2" in out, "SubtractCommand should output 'The answer is 2'"
-    assert "Exiting the program..." in out
-
-# Test for MultiplyCommand
-def test_app_multiply_command(capfd, monkeypatch):
-    inputs = iter(['multiply 3 4', 'exit'])  # Simulate input for REPL
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-
-    app = App()
-    with pytest.raises(SystemExit):
-        app.start()
-
-    out, err = capfd.readouterr()
-    assert "The answer is 12" in out, "MultiplyCommand should output 'The answer is 12'"
-    assert "Exiting the program..." in out
-
-# Test for DivideCommand
-def test_app_divide_command(capfd, monkeypatch):
-    inputs = iter(['divide 10 2', 'exit'])  # Simulate input for REPL
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-
-    app = App()
-    with pytest.raises(SystemExit):
-        app.start()
-
-    out, err = capfd.readouterr()
-    assert "The answer is 5.0" in out, "DivideCommand should output 'The answer is 5.0'"
-    assert "Exiting the program..." in out
-
-# Test for divide by zero handling
-def test_divide_by_zero(capfd, monkeypatch):
-    inputs = iter(['divide 10 0', 'exit'])  # Simulate input for REPL
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
-
-    app = App()
-    with pytest.raises(SystemExit):
-        app.start()
-
-    out, err = capfd.readouterr()
-    assert "Cannot divide by zero!" in out, "DivideCommand should handle divide by zero case"
-    assert "Exiting the program..." in out
+def test_divide_by_zero():
+    """
+    Test division by zero to ensure it raises a ZeroDivisionError
+    """
+    with pytest.raises(ZeroDivisionError, match="Cannot divide by 0!"):  # Expect a ZeroDivisionError to be raised.
+        DivideCommand().evaluate(Decimal(3), Decimal(0))  # Attempt to perform the calculation, which should trigger the ZeroDivisionError.
