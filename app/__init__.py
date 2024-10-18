@@ -9,7 +9,7 @@ import logging.config
 from app.commands import Command, CommandHandler
 
 class App:
-    def __init__(self):
+    def __init__(self) -> None:
         self.command_handler = CommandHandler()  # Initialize the CommandHandler to manage commands
         self.configure_logging()
         load_dotenv()
@@ -74,3 +74,73 @@ class App:
             except Exception as e:
                 logging.error(f"Error executing command: {command_name}. Exception: {e}")
                 print(f"Error executing command: {command_name}. Exception: {e}")  # Output for user feedback
+
+# import os
+# import sys
+# import pkgutil
+# import importlib
+# from dotenv import load_dotenv
+# import logging
+# import logging.config
+
+# from app.commands import Command, CommandHandler
+
+# class App:
+#     def __init__(self) -> None:
+#         os.makedirs('logs', exist_ok=True)
+#         self.configure_logging()
+#         load_dotenv()
+#         self.settings = self.load_environment_variables()
+#         self.settings.setdefault('ENVIRONMENT', 'PRODUCTION')
+#         self.command_handler = CommandHandler()  # Initialize the CommandHandler to manage commands
+
+#     def configure_logging(self):
+#         logging_conf_path = 'logging.conf'
+#         logging.config.fileConfig(logging_conf_path, disable_existing_loggers=False) if os.path.exists(logging_conf_path) else logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+#         logging.info("Logging configured.")
+
+#     def load_environment_variables(self):
+#         settings = {key: value for key, value in os.environ.items()}
+#         logging.info("Environment variables loaded.")
+#         return settings
+    
+#     def get_environment_variable(self, env_var: str = 'ENVIRONMENT'):
+#         return self.settings.get(env_var, None)
+
+#     def load_plugins(self):
+#         plugins_package = 'app.plugins'
+#         plugins_path = plugins_package.replace('.', '/')
+#         if not os.path.exists(plugins_path):
+#             logging.warning(f"Plugins directory '{plugins_path}' not found.")
+#             return
+#         for _, plugin_name, is_pkg in pkgutil.iter_modules([plugins_path]):
+#             if is_pkg:
+#                 try:
+#                     plugin_module = importlib.import_module(f'{plugins_package}.{plugin_name}')
+#                     self.register_plugin_commands(plugin_module, plugin_name)
+#                 except ImportError as e:
+#                     logging.error(f"Error importing plugin {plugin_name}: {e}"); print(f"Error importing plugin {plugin_name}: {e}")
+
+#     def register_plugin_commands(self, plugin_module, plugin_name):
+#         for item_name in dir(plugin_module):
+#             item = getattr(plugin_module, item_name)
+#             if isinstance(item, type) and issubclass(item, Command) and item is not Command:
+#                 # Command names are now explicitly set to the plugin's folder name
+#                 self.command_handler.add_command(plugin_name, item())
+#                 logging.info(f"Command '{plugin_name}' from plugin '{plugin_name}' registered.")
+
+#     def start(self):
+#         self.load_plugins()
+#         logging.info("Application started.")
+#         print(f"\nAvailable commands are: {', '.join(list(self.command_handler.commands.keys()))}")
+#         print(f"Usage: Command num1 num2 (Ex: add 3 4) or type 'exit' to exit.\n")
+        
+#         try:
+#             while True:  #REPL Read, Evaluate, Print, Loop
+#                 inp_text = input(">>> ").strip().split(sep=" ")
+#                 self.command_handler.add_command(inp_text[0], inp_text[1:])
+#         except KeyboardInterrupt:
+#             logging.info("Application interrupted and exiting gracefully.")
+#             sys.exit(0)  # Assuming a KeyboardInterrupt should also result in a clean exit.
+#         finally:
+#             logging.info("Application shutdown.")
