@@ -10,6 +10,7 @@ from app.commands import Command, CommandHandler
 
 class App:
     def __init__(self) -> None:
+        os.makedirs('logs', exist_ok=True)
         self.command_handler = CommandHandler()  # Initialize the CommandHandler to manage commands
         self.configure_logging()
         load_dotenv()
