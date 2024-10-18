@@ -17,6 +17,7 @@ from app.plugins.divide import DivideCommand
     (Decimal('10.5'), Decimal('2'), MultiplyCommand, Decimal('21.0')),  # Test multiplication with decimals
     (Decimal('10'), Decimal('0.5'), DivideCommand, Decimal('20')),  # Test division with decimals
 ])
+# pylint: disable=invalid-name
 def test_calculation_commands(a, b, command, expected):
     """
     Test calculation commands with various scenarios.
