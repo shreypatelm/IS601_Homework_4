@@ -9,7 +9,7 @@ from app import App
     ('divide'),
 ])
 # pylint: disable=invalid-name
-def test_calculation_operations(Command, monkeypatch):
+def test_calculation_commands(Command, monkeypatch):
     """Simulate command followed by exit."""
     inputs = iter([f'{Command}', 'exit'])  # Simulate command with arguments
     monkeypatch.setattr('builtins.input', lambda _: next(inputs))
@@ -65,4 +65,3 @@ def test_environment_variable_missing(monkeypatch):
     app = App()
 
     assert app.settings.get('ENVIRONMENT') == 'DEVELOPMENT'  # Default value
-    
